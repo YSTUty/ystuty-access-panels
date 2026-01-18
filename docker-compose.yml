@@ -1,0 +1,67 @@
+services:
+  pgadmin:
+    image: ${PGADMIN_IMAGE:-dpage/pgadmin4:9}
+    container_name: pgadmin
+    ports:
+      - ${PGADMIN_WEB_PORT:-5441}:80
+    volumes:
+      # - ./pgadmin-data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD?}
+      PGADMIN_CONFIG_SERVER_MODE: 'True'
+    networks:
+      - ystuty-access-network
+      - ystuty_network
+    restart: unless-stopped
+
+  redisinsight:
+    image: ${RI_IMAGE:-redislabs/redisinsight:latest}
+    container_name: redisinsight
+    # ports:
+    #   - 5442:${RI_PORT:-5442}
+    environment:
+      RIPORT: ${RI_PORT:-5442}
+      RIPROXYPATH: ${RI_PROXYPATH:-ri}
+      RITRUSTEDORIGINS: ${RI_TRUSTEDORIGINS}
+    user: "1000:1000"
+    volumes:
+      - redisinsight_data:/data
+
+  ri-nginx-basicauth:
+    image: nginx
+    container_name: redisinsight-ngnix
+    volumes:
+      - ./nginx-basic-auth.conf.template:/etc/nginx/templates/nginx-basic-auth.conf.template
+    ports:
+      - "${RI_NGINX_PORT:-8084}:${RI_NGINX_PORT:-8084}"
+    environment:
+      - FORWARD_HOST=redisinsight
+      - FORWARD_PORT=${RI_PORT:-5442}
+      - NGINX_PORT=${RI_NGINX_PORT:-8084}
+      - BASIC_USERNAME=${RI_BASIC_USERNAME:-redis}
+      - BASIC_PASSWORD=${RI_BASIC_PASSWORD:-password}
+    command:
+      - bash
+      - -c
+      - |
+        printf "$$BASIC_USERNAME:$$(openssl passwd -1 $$BASIC_PASSWORD)\n" >> /etc/nginx/.htpasswd
+        /docker-entrypoint.sh nginx -g "daemon off;"
+    depends_on:
+      - redisinsight
+    networks:
+      - ystuty-access-network
+      - ystuty_network
+
+volumes:
+  redisinsight_data:
+  pgadmin_data:
+
+networks:
+  ystuty_network:
+    name: ystuty_network
+    external: true
+  ystuty-access-network:
+    name: ystuty_access
+    external: true
