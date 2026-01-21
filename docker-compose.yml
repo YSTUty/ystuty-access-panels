@@ -4,6 +4,8 @@ services:
     container_name: pgadmin
     ports:
       - ${PGADMIN_WEB_PORT:-5441}:80
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     volumes:
       # - ./pgadmin-data:/var/lib/pgadmin
       - pgadmin_data:/var/lib/pgadmin
@@ -21,6 +23,8 @@ services:
     container_name: redisinsight
     # ports:
     #   - 5442:${RI_PORT:-5442}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     environment:
       RI_APP_PORT: ${RI_PORT:-5442}
       RIPROXYPATH: ${RI_PROXYPATH:-ri}
