@@ -28,6 +28,9 @@ services:
     user: "1000:1000"
     volumes:
       - redisinsight_data:/data
+    networks:
+      - ystuty-access-network
+      - ystuty_network
 
   ri-nginx-basicauth:
     image: nginx
@@ -51,7 +54,6 @@ services:
     depends_on:
       - redisinsight
     networks:
-      - ystuty-access-network
       - ystuty_network
 
 volumes:
