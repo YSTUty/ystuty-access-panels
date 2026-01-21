@@ -22,7 +22,7 @@ services:
     # ports:
     #   - 5442:${RI_PORT:-5442}
     environment:
-      RIPORT: ${RI_PORT:-5442}
+      RI_APP_PORT: ${RI_PORT:-5442}
       RIPROXYPATH: ${RI_PROXYPATH:-ri}
       RITRUSTEDORIGINS: ${RI_TRUSTEDORIGINS}
     user: "1000:1000"
