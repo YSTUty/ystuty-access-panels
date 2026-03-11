@@ -1,5 +1,6 @@
 services:
   pgadmin:
+    hostname: ystuty-access-panels-pgadmin
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:9}
     container_name: pgadmin
     ports:
@@ -14,11 +15,13 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD?}
       PGADMIN_CONFIG_SERVER_MODE: 'True'
     networks:
-      - ystuty-access-network
-      - ystuty_network
+      - ystuty-network
+      # - ystuty-access-network
+      # - ystuty-service-network
     restart: unless-stopped
 
   redisinsight:
+    hostname: ystuty-access-panels-redisinsight
     image: ${RI_IMAGE:-redislabs/redisinsight:latest}
     container_name: redisinsight
     # ports:
@@ -33,8 +36,9 @@ services:
     volumes:
       - redisinsight_data:/data
     networks:
-      - ystuty-access-network
-      - ystuty_network
+      - ystuty-network
+      # - ystuty-access-network
+      # - ystuty-service-network
 
   ri-nginx-basicauth:
     image: nginx
@@ -44,7 +48,7 @@ services:
     ports:
       - "${RI_NGINX_PORT:-8084}:${RI_NGINX_PORT:-8084}"
     environment:
-      - FORWARD_HOST=redisinsight
+      - FORWARD_HOST=ystuty-access-panels-redisinsight
       - FORWARD_PORT=${RI_PORT:-5442}
       - NGINX_PORT=${RI_NGINX_PORT:-8084}
       - BASIC_USERNAME=${RI_BASIC_USERNAME:-redis}
@@ -58,16 +62,16 @@ services:
     depends_on:
       - redisinsight
     networks:
-      - ystuty_network
+      - ystuty-network
 
 volumes:
   redisinsight_data:
   pgadmin_data:
 
 networks:
-  ystuty_network:
-    name: ystuty_network
+  ystuty-network:
     external: true
-  ystuty-access-network:
-    name: ystuty_access
-    external: true
+  # ystuty-access-network:
+  #   external: true
+  # ystuty-service-network:
+  #   external: true

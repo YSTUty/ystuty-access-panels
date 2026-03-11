@@ -1,4 +1,4 @@
-project_name ?= ystuty_access_panels
+project_name ?= ystuty-access-panels
 
 base_yml := docker-compose.yml
 
@@ -9,7 +9,7 @@ files_base := -f $(base_yml)
 panel_service_pg := pgadmin
 panel_service_redis := redisinsight ri-nginx-basicauth
 
-networks := ystuty_network ystuty_access
+networks := ystuty-network # ystuty-access-network ystuty-service-network
 
 .DEFAULT_GOAL := help
 
